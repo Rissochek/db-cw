@@ -70,7 +70,8 @@ func (pg *Postgres) GetListingByID(ctx context.Context, id int) (*model.Listing,
 	err := pg.conn.GetContext(ctx, &listing, query, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("listing with id %d not found", id)
+			zap.S().Errorf("listing with id %d not found", id)
+			return nil, fmt.Errorf("listing not found")
 		}
 		zap.S().Errorf("failed to get listing: %v", err)
 		return nil, fmt.Errorf("failed to get listing")
@@ -175,7 +176,8 @@ func (pg *Postgres) DeleteListing(ctx context.Context, id int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("listing with id %d not found", id)
+		zap.S().Errorf("listing with id %d not found", id)
+		return fmt.Errorf("listing not found")
 	}
 
 	return nil

@@ -1,4 +1,4 @@
-package service
+package handler
 
 import (
 	"context"
@@ -6,31 +6,17 @@ import (
 	"github.com/Rissochek/db-cw/internal/model"
 )
 
-type Service struct {
-	faker Faker
-	repo  Repo
+type Handler struct {
+	service Service
 }
 
-func NewService(faker Faker, repo Repo) *Service {
-	return &Service{
-		faker: faker,
-		repo:  repo,
+func NewHandler(s Service) *Handler {
+	return &Handler{
+		service: s,
 	}
 }
 
-type Faker interface {
-	GenerateFakeUsers(toGen int) (users []model.User)
-	GenerateFakeListings(toGen int, users []model.User) (listings []model.Listing, listingsMap map[int][]model.Listing)
-	GenerateFakeBookings(toGen int, users []model.User, listings []model.Listing, listingsMap map[int][]model.Listing) (bookings []model.Booking)
-	GenerateFakeReviews(toGen int, bookings []model.Booking, listings []model.Listing) (reviews []model.Review)
-}
-
-type Repo interface {
-	CreateUsers(ctx context.Context, users []model.User) error
-	CreateListings(ctx context.Context, listings []model.Listing) error
-	CreateBookings(ctx context.Context, bookings []model.Booking) error
-	CreateReviews(ctx context.Context, reviews []model.Review) error
-
+type Service interface {
 	CreateUser(ctx context.Context, user *model.User) error
 	GetUserByID(ctx context.Context, id int) (*model.User, error)
 	UpdateUser(ctx context.Context, user *model.User) error

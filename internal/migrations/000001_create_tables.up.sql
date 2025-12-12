@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- таблица объявлений
 CREATE TABLE IF NOT EXISTS listings (
     id SERIAL PRIMARY KEY,
-    host_id INTEGER NOT NULL REFERENCES users(id),
+    host_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     address TEXT NOT NULL,
     price_per_night DECIMAL(10,2) NOT NULL CHECK (price_per_night > 0),
     is_available BOOLEAN DEFAULT TRUE,
@@ -21,11 +21,11 @@ CREATE TABLE IF NOT EXISTS listings (
 -- таблица бронирований
 CREATE TABLE IF NOT EXISTS bookings (
     booking_id SERIAL PRIMARY KEY,
-    listing_id INTEGER NOT NULL REFERENCES listings(id),
-    host_id INTEGER NOT NULL REFERENCES users(id),
-    guest_id INTEGER NOT NULL REFERENCES users(id),
-    in_date TIMESTAMP NOT NULL,
-    out_date TIMESTAMP NOT NULL,
+    listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+    host_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    guest_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    in_date TIMESTAMPTZ NOT NULL,
+    out_date TIMESTAMPTZ NOT NULL,
     total_price DECIMAL(12,2) NOT NULL CHECK (total_price >= 0),
     is_paid BOOLEAN DEFAULT FALSE
 );
@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS bookings (
 -- таблица отзывов
 CREATE TABLE IF NOT EXISTS reviews (
     id SERIAL PRIMARY KEY,
-    booking_id INTEGER NOT NULL UNIQUE REFERENCES bookings(booking_id),
-    user_id INTEGER NOT NULL REFERENCES users(id) ,
+    booking_id INTEGER NOT NULL UNIQUE REFERENCES bookings(booking_id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     text TEXT,
     score INTEGER NOT NULL CHECK (score >= 1 AND score <= 5)
 );

@@ -67,7 +67,8 @@ func (pg *Postgres) GetBookingByID(ctx context.Context, bookingID int) (*model.B
 	err := pg.conn.GetContext(ctx, &booking, query, bookingID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("booking with id %d not found", bookingID)
+			zap.S().Errorf("booking with id %d not found", bookingID)
+			return nil, fmt.Errorf("booking not found")
 		}
 		zap.S().Errorf("failed to get booking: %v", err)
 		return nil, fmt.Errorf("failed to get booking")
@@ -169,7 +170,8 @@ func (pg *Postgres) DeleteBooking(ctx context.Context, bookingID int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("booking with id %d not found", bookingID)
+		zap.S().Errorf("booking with id %d not found", bookingID)
+		return fmt.Errorf("booking not found")
 	}
 
 	return nil

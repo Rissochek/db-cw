@@ -1,36 +1,28 @@
 package main
 
 import (
-	"context"
-	"time"
+	"errors"
+	"net/http"
 
-	"github.com/Rissochek/db-cw/internal/faking"
-	"github.com/Rissochek/db-cw/internal/repository/postgres"
-	"github.com/Rissochek/db-cw/internal/service"
-	"github.com/Rissochek/db-cw/internal/utils"
+	"github.com/Rissochek/db-cw/internal/app"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-var (
-	seed = int64(42)
-)
+// @title DB CW
+// @version 1.0
+// @host localhost:8080
 
 func main() {
-	utils.LoadEnvFile()
+	config := zap.NewDevelopmentConfig()
+	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	config.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
 
-	logger, _ := zap.NewDevelopment()
+	logger, _ := config.Build()
 	zap.ReplaceGlobals(logger)
 	defer logger.Sync()
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
-	faker := faking.NewDataFaker(seed)
-
-	dsn := postgres.CreateDsnFromEnv()
-	conn := postgres.CreateConnection(dsn)
-	repo := postgres.NewPostgres(conn)
-
-	service := service.NewService(faker, repo)
-	service.FillDatabase(ctx, seed)
+	if err := app.InitApp().SetupRoutes().Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		zap.S().Errorf("failed to start server: %v", err)
+	}
 }

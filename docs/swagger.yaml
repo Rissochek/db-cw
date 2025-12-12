@@ -1,0 +1,678 @@
+definitions:
+  handler.BookingCreate:
+    properties:
+      guest_id:
+        type: integer
+      in_date:
+        example: "2025-12-12T14:00:00+03:00"
+        type: string
+      listing_id:
+        type: integer
+      out_date:
+        example: "2025-12-15T14:00:00+03:00"
+        type: string
+    type: object
+  handler.BookingUpdate:
+    properties:
+      in_date:
+        example: "2025-12-12T14:00:00+03:00"
+        type: string
+      is_paid:
+        type: boolean
+      out_date:
+        example: "2025-12-16T14:00:00+03:00"
+        type: string
+    type: object
+  handler.ErrorBadRequest:
+    properties:
+      error:
+        example: invalid request body
+        type: string
+    type: object
+  handler.ErrorInternal:
+    properties:
+      error:
+        example: some internal error
+        type: string
+    type: object
+  handler.ErrorNotFound:
+    properties:
+      error:
+        example: not found
+        type: string
+    type: object
+  handler.ListingCreate:
+    properties:
+      address:
+        type: string
+      beds_number:
+        type: integer
+      host_id:
+        type: integer
+      price_per_night:
+        type: number
+      rooms_number:
+        type: integer
+    type: object
+  handler.ListingUpdate:
+    properties:
+      beds_number:
+        type: integer
+      is_available:
+        type: boolean
+      price_per_night:
+        type: number
+      rooms_number:
+        type: integer
+    type: object
+  handler.ReviewCreate:
+    properties:
+      booking_id:
+        type: integer
+      score:
+        type: integer
+      text:
+        type: string
+    type: object
+  handler.ReviewUpdate:
+    properties:
+      score:
+        type: integer
+      text:
+        type: string
+    type: object
+  handler.StatusOK:
+    properties:
+      message:
+        example: deleted successfully
+        type: string
+    type: object
+  handler.UserCreate:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      password:
+        type: string
+      second_name:
+        type: string
+    type: object
+  handler.UserReturn:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      second_name:
+        type: string
+    type: object
+  handler.UserUpdate:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      password:
+        type: string
+      second_name:
+        type: string
+    type: object
+  model.Booking:
+    properties:
+      guest_id:
+        type: integer
+      host_id:
+        type: integer
+      id:
+        type: integer
+      in_date:
+        type: string
+      is_paid:
+        type: boolean
+      listing_id:
+        type: integer
+      out_date:
+        type: string
+      total_price:
+        type: number
+    type: object
+  model.Listing:
+    properties:
+      address:
+        type: string
+      beds_number:
+        type: integer
+      host_id:
+        type: integer
+      id:
+        type: integer
+      is_available:
+        type: boolean
+      price_per_night:
+        type: number
+      rooms_number:
+        type: integer
+    type: object
+  model.Review:
+    properties:
+      booking_id:
+        type: integer
+      id:
+        type: integer
+      score:
+        type: integer
+      text:
+        type: string
+      user_id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: DB CW
+  version: "1.0"
+paths:
+  /api/bookings:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные бронирования
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/handler.BookingCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Создать бронирование
+      tags:
+      - bookings
+  /api/bookings/{id}:
+    delete:
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить бронирование
+      tags:
+      - bookings
+    get:
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить бронирование по ID
+      tags:
+      - bookings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные бронирования
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/handler.BookingUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Обновить бронирование
+      tags:
+      - bookings
+  /api/listings:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные объявления
+        in: body
+        name: listing
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ListingCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Listing'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Создать объявление
+      tags:
+      - listings
+  /api/listings/{id}:
+    delete:
+      parameters:
+      - description: Listing ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить объявление
+      tags:
+      - listings
+    get:
+      parameters:
+      - description: Listing ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Listing'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить объявление по ID
+      tags:
+      - listings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Listing ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные объявления
+        in: body
+        name: listing
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ListingUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Listing'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Обновить объявление
+      tags:
+      - listings
+  /api/reviews:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные отзыва
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ReviewCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Review'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Создать отзыв
+      tags:
+      - reviews
+  /api/reviews/{id}:
+    delete:
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить отзыв
+      tags:
+      - reviews
+    get:
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Review'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить отзыв по ID
+      tags:
+      - reviews
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные отзыва
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ReviewUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Review'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Обновить отзыв
+      tags:
+      - reviews
+  /api/users:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UserCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.UserReturn'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Создать пользователя
+      tags:
+      - users
+  /api/users/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить пользователя
+      tags:
+      - users
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.UserReturn'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить пользователя по ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UserUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.UserReturn'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Обновить пользователя
+      tags:
+      - users
+swagger: "2.0"

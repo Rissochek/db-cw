@@ -65,7 +65,8 @@ func (pg *Postgres) GetReviewByID(ctx context.Context, id int) (*model.Review, e
 	err := pg.conn.GetContext(ctx, &review, query, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("review with id %d not found", id)
+			zap.S().Errorf("review with id %d not found", id)
+			return nil, fmt.Errorf("review not found")
 		}
 		zap.S().Errorf("failed to get review: %v", err)
 		return nil, fmt.Errorf("failed to get review")
@@ -170,7 +171,8 @@ func (pg *Postgres) DeleteReview(ctx context.Context, id int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("review with id %d not found", id)
+		zap.S().Errorf("review with id %d not found", id)
+		return fmt.Errorf("review not found")
 	}
 
 	return nil

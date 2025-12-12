@@ -65,7 +65,8 @@ func (pg *Postgres) GetUserByID(ctx context.Context, id int) (*model.User, error
 	err := pg.conn.GetContext(ctx, &user, query, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("user with id %d not found", id)
+			zap.S().Errorf("user with id %d not found", id)
+			return nil, fmt.Errorf("user not found")
 		}
 		zap.S().Errorf("failed to get user: %v", err)
 		return nil, fmt.Errorf("failed to get user")
@@ -165,7 +166,8 @@ func (pg *Postgres) DeleteUser(ctx context.Context, id int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("user with id %d not found", id)
+		zap.S().Errorf("user with id %d not found", id)
+		return fmt.Errorf("user not found")
 	}
 
 	return nil
