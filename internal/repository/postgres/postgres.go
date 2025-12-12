@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/lib/pq" // драйвер PostgreSQL для sqlx
+
 	"github.com/Rissochek/db-cw/internal/utils"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -20,13 +22,14 @@ func NewPostgres(conn *sqlx.DB) *Postgres {
 }
 
 func CreateConnection(dsn string) *sqlx.DB {
-	time.Sleep(3 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 	zap.S().Infof("waiting for db connection")
 
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		zap.S().Fatalf("failed connect to postgres: %v", err)
 	}
+	zap.S().Infof("connected to postgres: %v", dsn)
 
 	return db
 }

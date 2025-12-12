@@ -7,6 +7,7 @@ import (
 
 	"github.com/Rissochek/db-cw/internal/model"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 )
 
 func (pg *Postgres) CreateListing(ctx context.Context, listing *model.Listing) error {
@@ -16,7 +17,8 @@ func (pg *Postgres) CreateListing(ctx context.Context, listing *model.Listing) e
 	err := pg.conn.QueryRowxContext(ctx, query, listing.HostID, listing.Address, listing.PricePerNight,
 		listing.IsAvailable, listing.RoomsNumber, listing.BedsNumber).Scan(&listing.ID)
 	if err != nil {
-		return fmt.Errorf("failed to create listing: %w", err)
+		zap.S().Errorf("failed to create listing: %v", err)
+		return fmt.Errorf("failed to create listing")
 	}
 
 	return nil
@@ -26,15 +28,18 @@ func (pg *Postgres) CreateListings(ctx context.Context, listings []model.Listing
 	query := `INSERT INTO listings (host_id, address, price_per_night, is_available, rooms_number, beds_number) 
 		VALUES ($1, $2, $3, $4, $5, $6)`
 
+	zap.S().Infof("start adding %v listings", len(listings))
 	tx, err := pg.conn.BeginTxx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		zap.S().Errorf("failed to begin transaction: %v", err)
+		return fmt.Errorf("failed to create listings")
 	}
 	defer tx.Rollback()
 
 	stmt, err := tx.PreparexContext(ctx, query)
 	if err != nil {
-		return fmt.Errorf("failed to prepare statement: %w", err)
+		zap.S().Errorf("failed to prepare statement: %v", err)
+		return fmt.Errorf("failed to create listings")
 	}
 	defer stmt.Close()
 
@@ -42,13 +47,16 @@ func (pg *Postgres) CreateListings(ctx context.Context, listings []model.Listing
 		_, err := stmt.ExecContext(ctx, listings[i].HostID, listings[i].Address, listings[i].PricePerNight,
 			listings[i].IsAvailable, listings[i].RoomsNumber, listings[i].BedsNumber)
 		if err != nil {
-			return fmt.Errorf("failed to insert listing at index %d: %w", i, err)
+			zap.S().Errorf("failed to insert listing at index %d: %v", i, err)
+			return fmt.Errorf("failed to create listings")
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		zap.S().Errorf("failed to commit transaction: %v", err)
+		return fmt.Errorf("failed to create listings")
 	}
+	zap.S().Infof("added %v listings", len(listings))
 
 	return nil
 }
@@ -64,7 +72,8 @@ func (pg *Postgres) GetListingByID(ctx context.Context, id int) (*model.Listing,
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("listing with id %d not found", id)
 		}
-		return nil, fmt.Errorf("failed to get listing: %w", err)
+		zap.S().Errorf("failed to get listing: %v", err)
+		return nil, fmt.Errorf("failed to get listing")
 	}
 
 	return &listing, nil
@@ -74,7 +83,8 @@ func (pg *Postgres) GetListingsByID(ctx context.Context, ids []int) ([]model.Lis
 	query, args, err := sqlx.In(`SELECT id, host_id, address, price_per_night, is_available, rooms_number, beds_number 
 		FROM listings WHERE id IN (?)`, ids)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build query: %w", err)
+		zap.S().Errorf("failed to build query: %v", err)
+		return nil, fmt.Errorf("failed to get listings")
 	}
 
 	query = pg.conn.Rebind(query)
@@ -82,7 +92,8 @@ func (pg *Postgres) GetListingsByID(ctx context.Context, ids []int) ([]model.Lis
 
 	err = pg.conn.SelectContext(ctx, &listings, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get listings: %w", err)
+		zap.S().Errorf("failed to get listings: %v", err)
+		return nil, fmt.Errorf("failed to get listings")
 	}
 
 	return listings, nil
@@ -96,16 +107,19 @@ func (pg *Postgres) UpdateListing(ctx context.Context, listing *model.Listing) e
 	result, err := pg.conn.ExecContext(ctx, query, listing.HostID, listing.Address, listing.PricePerNight,
 		listing.IsAvailable, listing.RoomsNumber, listing.BedsNumber, listing.ID)
 	if err != nil {
-		return fmt.Errorf("failed to update listing: %w", err)
+		zap.S().Errorf("failed to update listing: %v", err)
+		return fmt.Errorf("failed to update listing")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		zap.S().Errorf("failed to get rows affected: %v", err)
+		return fmt.Errorf("failed to update listing")
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("listing with id %d not found", listing.ID)
+		zap.S().Errorf("listing with id %d not found", listing.ID)
+		return fmt.Errorf("listing not found")
 	}
 
 	return nil
@@ -116,13 +130,15 @@ func (pg *Postgres) UpdateListings(ctx context.Context, listings []model.Listing
 
 	tx, err := pg.conn.BeginTxx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		zap.S().Errorf("failed to begin transaction: %v", err)
+		return fmt.Errorf("failed to update listings")
 	}
 	defer tx.Rollback()
 
 	stmt, err := tx.PreparexContext(ctx, query)
 	if err != nil {
-		return fmt.Errorf("failed to prepare statement: %w", err)
+		zap.S().Errorf("failed to prepare statement: %v", err)
+		return fmt.Errorf("failed to update listings")
 	}
 	defer stmt.Close()
 
@@ -130,12 +146,14 @@ func (pg *Postgres) UpdateListings(ctx context.Context, listings []model.Listing
 		_, err := stmt.ExecContext(ctx, listings[i].HostID, listings[i].Address, listings[i].PricePerNight,
 			listings[i].IsAvailable, listings[i].RoomsNumber, listings[i].BedsNumber, listings[i].ID)
 		if err != nil {
-			return fmt.Errorf("failed to update listing at index %d: %w", i, err)
+			zap.S().Errorf("failed to update listing at index %d: %v", i, err)
+			return fmt.Errorf("failed to update listings")
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		zap.S().Errorf("failed to commit transaction: %v", err)
+		return fmt.Errorf("failed to update listings")
 	}
 
 	return nil
@@ -146,12 +164,14 @@ func (pg *Postgres) DeleteListing(ctx context.Context, id int) error {
 
 	result, err := pg.conn.ExecContext(ctx, query, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete listing: %w", err)
+		zap.S().Errorf("failed to delete listing: %v", err)
+		return fmt.Errorf("failed to delete listing")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		zap.S().Errorf("failed to get rows affected: %v", err)
+		return fmt.Errorf("failed to delete listing")
 	}
 
 	if rowsAffected == 0 {
@@ -164,14 +184,16 @@ func (pg *Postgres) DeleteListing(ctx context.Context, id int) error {
 func (pg *Postgres) DeleteListings(ctx context.Context, ids []int) error {
 	query, args, err := sqlx.In(`DELETE FROM listings WHERE id IN (?)`, ids)
 	if err != nil {
-		return fmt.Errorf("failed to build query: %w", err)
+		zap.S().Errorf("failed to build query: %v", err)
+		return fmt.Errorf("failed to delete listings")
 	}
 
 	query = pg.conn.Rebind(query)
 
 	_, err = pg.conn.ExecContext(ctx, query, args...)
 	if err != nil {
-		return fmt.Errorf("failed to delete listings: %w", err)
+		zap.S().Errorf("failed to delete listings: %v", err)
+		return fmt.Errorf("failed to delete listings")
 	}
 
 	return nil
