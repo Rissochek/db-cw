@@ -146,3 +146,39 @@ func (h *Handler) DeleteBooking(c echo.Context) error {
 		"message": "booking deleted successfully",
 	})
 }
+
+// @Summary Batch импорт бронирований
+// @Tags bookings
+// @Accept json
+// @Produce json
+// @Param bookings body []BookingCreate true "Массив бронирований"
+// @Success 201 {object} map[string]int "Количество созданных бронирований"
+// @Failure 400 {object} ErrorBadRequest
+// @Failure 500 {object} ErrorInternal
+// @Router /api/bookings/batch [post]
+func (h *Handler) BatchImportBookings(c echo.Context) error {
+	var bookingsCreate []BookingCreate
+	if err := c.Bind(&bookingsCreate); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid request body",
+		})
+	}
+
+	bookings := make([]model.Booking, len(bookingsCreate))
+	for i := range bookingsCreate {
+		bookings[i].ListingID = bookingsCreate[i].ListingID
+		bookings[i].GuestID = bookingsCreate[i].GuestID
+		bookings[i].InDate = bookingsCreate[i].InDate
+		bookings[i].OutDate = bookingsCreate[i].OutDate
+	}
+
+	if err := h.service.CreateBookings(c.Request().Context(), bookings); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]int{
+		"created": len(bookings),
+	})
+}

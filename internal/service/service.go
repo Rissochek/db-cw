@@ -45,6 +45,8 @@ type Repo interface {
 	GetBookingByID(ctx context.Context, bookingID int) (*model.Booking, error)
 	UpdateBooking(ctx context.Context, booking *model.Booking) error
 	DeleteBooking(ctx context.Context, bookingID int) error
+	GetBookingsByID(ctx context.Context, bookingIDs []int) ([]model.Booking, error)
+	GetBookingsByListingID(ctx context.Context, listingID int) ([]model.Booking, error)
 
 	CreateReview(ctx context.Context, review *model.Review) error
 	GetReviewByID(ctx context.Context, id int) (*model.Review, error)

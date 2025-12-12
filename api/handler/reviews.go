@@ -144,3 +144,41 @@ func (h *Handler) DeleteReview(c echo.Context) error {
 		"message": "review deleted successfully",
 	})
 }
+
+// @Summary Batch импорт отзывов
+// @Tags reviews
+// @Accept json
+// @Produce json
+// @Param reviews body []ReviewCreate true "Массив отзывов"
+// @Success 201 {object} map[string]int "Количество созданных отзывов"
+// @Failure 400 {object} ErrorBadRequest
+// @Failure 500 {object} ErrorInternal
+// @Router /api/reviews/batch [post]
+func (h *Handler) BatchImportReviews(c echo.Context) error {
+	var reviewsCreate []ReviewCreate
+	if err := c.Bind(&reviewsCreate); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid request body",
+		})
+	}
+
+	reviews := make([]model.Review, len(reviewsCreate))
+	for i := range reviewsCreate {
+		reviews[i].BookingID = reviewsCreate[i].BookingID
+		// reviews[i].UserID = reviewsCreate[i].UserID
+		reviews[i].Score = reviewsCreate[i].Score
+		if reviewsCreate[i].Text != "" {
+			reviews[i].Text = reviewsCreate[i].Text
+		}
+	}
+
+	if err := h.service.CreateReviews(c.Request().Context(), reviews); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]int{
+		"created": len(reviews),
+	})
+}

@@ -31,3 +31,7 @@ func (s *Service) UpdateListing(ctx context.Context, listing *model.Listing) err
 func (s *Service) DeleteListing(ctx context.Context, id int) error {
 	return s.repo.DeleteListing(ctx, id)
 }
+
+func (s *Service) CreateListings(ctx context.Context, listings []model.Listing) error {
+	return s.repo.CreateListings(ctx, listings)
+}

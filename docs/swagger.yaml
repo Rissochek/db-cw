@@ -300,6 +300,39 @@ paths:
       summary: Обновить бронирование
       tags:
       - bookings
+  /api/bookings/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Массив бронирований
+        in: body
+        name: bookings
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/handler.BookingCreate'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Количество созданных бронирований
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Batch импорт бронирований
+      tags:
+      - bookings
   /api/listings:
     post:
       consumes:
@@ -423,6 +456,39 @@ paths:
           schema:
             $ref: '#/definitions/handler.ErrorInternal'
       summary: Обновить объявление
+      tags:
+      - listings
+  /api/listings/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Массив объявлений
+        in: body
+        name: listings
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/handler.ListingCreate'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Количество созданных объявлений
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Batch импорт объявлений
       tags:
       - listings
   /api/reviews:
@@ -550,6 +616,39 @@ paths:
       summary: Обновить отзыв
       tags:
       - reviews
+  /api/reviews/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Массив отзывов
+        in: body
+        name: reviews
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/handler.ReviewCreate'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Количество созданных отзывов
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Batch импорт отзывов
+      tags:
+      - reviews
   /api/users:
     post:
       consumes:
@@ -673,6 +772,39 @@ paths:
           schema:
             $ref: '#/definitions/handler.ErrorInternal'
       summary: Обновить пользователя
+      tags:
+      - users
+  /api/users/batch:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Массив пользователей
+        in: body
+        name: users
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/handler.UserCreate'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Количество созданных пользователей
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Batch импорт пользователей
       tags:
       - users
 swagger: "2.0"

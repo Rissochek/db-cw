@@ -21,3 +21,7 @@ func (s *Service) UpdateUser(ctx context.Context, user *model.User) error {
 func (s *Service) DeleteUser(ctx context.Context, id int) error {
 	return s.repo.DeleteUser(ctx, id)
 }
+
+func (s *Service) CreateUsers(ctx context.Context, users []model.User) error {
+	return s.repo.CreateUsers(ctx, users)
+}

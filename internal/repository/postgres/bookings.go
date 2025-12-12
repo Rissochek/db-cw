@@ -96,6 +96,19 @@ func (pg *Postgres) GetBookingsByID(ctx context.Context, bookingIDs []int) ([]mo
 	return bookings, nil
 }
 
+func (pg *Postgres) GetBookingsByListingID(ctx context.Context, listingID int) ([]model.Booking, error) {
+	query := `SELECT booking_id, listing_id, host_id, guest_id, in_date, out_date, total_price, is_paid FROM bookings WHERE listing_id = $1`
+
+	var bookings []model.Booking
+	err := pg.conn.SelectContext(ctx, &bookings, query, listingID)
+	if err != nil {
+		zap.S().Errorf("failed to get bookings by listing id: %v", err)
+		return nil, fmt.Errorf("failed to get bookings")
+	}
+
+	return bookings, nil
+}
+
 func (pg *Postgres) UpdateBooking(ctx context.Context, booking *model.Booking) error {
 	query := `UPDATE bookings SET listing_id = $1, host_id = $2, guest_id = $3, in_date = $4, out_date = $5, total_price = $6, is_paid = $7 WHERE booking_id = $8`
 

@@ -144,3 +144,41 @@ func (h *Handler) DeleteListing(c echo.Context) error {
 		"message": "listing deleted successfully",
 	})
 }
+
+// @Summary Batch импорт объявлений
+// @Tags listings
+// @Accept json
+// @Produce json
+// @Param listings body []ListingCreate true "Массив объявлений"
+// @Success 201 {object} map[string]int "Количество созданных объявлений"
+// @Failure 400 {object} ErrorBadRequest
+// @Failure 500 {object} ErrorInternal
+// @Router /api/listings/batch [post]
+func (h *Handler) BatchImportListings(c echo.Context) error {
+	var listingsCreate []ListingCreate
+	if err := c.Bind(&listingsCreate); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid request body",
+		})
+	}
+
+	listings := make([]model.Listing, len(listingsCreate))
+	for i := range listingsCreate {
+		listings[i].HostID = listingsCreate[i].HostID
+		listings[i].Address = listingsCreate[i].Address
+		listings[i].PricePerNight = listingsCreate[i].PricePerNight
+		listings[i].RoomsNumber = listingsCreate[i].RoomsNumber
+		listings[i].BedsNumber = listingsCreate[i].BedsNumber
+		listings[i].IsAvailable = true
+	}
+
+	if err := h.service.CreateListings(c.Request().Context(), listings); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]int{
+		"created": len(listings),
+	})
+}

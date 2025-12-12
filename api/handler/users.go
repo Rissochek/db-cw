@@ -163,3 +163,46 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 		"message": "user deleted successfully",
 	})
 }
+
+// @Summary Batch импорт пользователей
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param users body []UserCreate true "Массив пользователей"
+// @Success 201 {object} map[string]int "Количество созданных пользователей"
+// @Failure 400 {object} ErrorBadRequest
+// @Failure 500 {object} ErrorInternal
+// @Router /api/users/batch [post]
+func (h *Handler) BatchImportUsers(c echo.Context) error {
+	var usersCreate []UserCreate
+	if err := c.Bind(&usersCreate); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid request body",
+		})
+	}
+
+	users := make([]model.User, len(usersCreate))
+	for i := range usersCreate {
+		users[i].Email = usersCreate[i].Email
+		users[i].FirstName = usersCreate[i].FirstName
+		users[i].SecondName = usersCreate[i].SecondName
+
+		hashedPassword, err := utils.GenerateHash(usersCreate[i].Password)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "failed to hash password",
+			})
+		}
+		users[i].Password = hashedPassword
+	}
+
+	if err := h.service.CreateUsers(c.Request().Context(), users); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]int{
+		"created": len(users),
+	})
+}
