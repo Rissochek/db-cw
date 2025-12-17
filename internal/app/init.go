@@ -17,7 +17,7 @@ import (
 
 var (
 	seed  = int64(42)
-	isGen = true
+	isGen = false
 )
 
 func InitApp() *App {

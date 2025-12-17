@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS listings (
     is_available BOOLEAN DEFAULT TRUE,
     rooms_number INTEGER NOT NULL CHECK (rooms_number > 0),
     beds_number INTEGER NOT NULL CHECK (beds_number > 0)
+    average_rating DECIMAL(3,2) DEFAULT 0.00 CHECK (average_rating >= 0 AND average_rating <= 5),
+    reviews_count INTEGER DEFAULT 0 CHECK (reviews_count >= 0),
+    bookings_count INTEGER DEFAULT 0 CHECK (bookings_count >= 0);
 );
 
 -- таблица бронирований
@@ -63,7 +66,7 @@ CREATE TABLE IF NOT EXISTS favorites (
 -- таблица платежей
 CREATE TABLE IF NOT EXISTS payments (
     payment_id SERIAL PRIMARY KEY,
-    booking_id INTEGER NOT NULL REFERENCES bookings(booking_id) ON DELETE CASCADE,
+    booking_id INTEGER REFERENCES bookings(booking_id) ON DELETE SET NULL,
     amount DECIMAL(12,2) NOT NULL CHECK (amount >= 0),
     payment_method TEXT NOT NULL CHECK (payment_method IN ('card', 'paypal', 'bank_transfer', 'crypto')),
     payment_status TEXT NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
@@ -81,6 +84,7 @@ CREATE TABLE IF NOT EXISTS images (
     uploaded_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- таблица аудита
 CREATE TABLE IF NOT EXISTS audit_log (
     id SERIAL PRIMARY KEY,
     table_name VARCHAR(100) NOT NULL,
