@@ -38,3 +38,55 @@ CREATE TABLE IF NOT EXISTS reviews (
     text TEXT,
     score INTEGER NOT NULL CHECK (score >= 1 AND score <= 5)
 );
+
+-- таблица удобств
+CREATE TABLE IF NOT EXISTS amenities (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE
+);
+
+-- таблица связи объявлений и удобств (многие-ко-многим)
+CREATE TABLE IF NOT EXISTS listing_amenities (
+    listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+    amenity_id INTEGER NOT NULL REFERENCES amenities(id) ON DELETE CASCADE,
+    PRIMARY KEY (listing_id, amenity_id)
+);
+
+-- таблица избранного
+CREATE TABLE IF NOT EXISTS favorites (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+    UNIQUE(user_id, listing_id)
+);
+
+-- таблица платежей
+CREATE TABLE IF NOT EXISTS payments (
+    payment_id SERIAL PRIMARY KEY,
+    booking_id INTEGER NOT NULL REFERENCES bookings(booking_id) ON DELETE CASCADE,
+    amount DECIMAL(12,2) NOT NULL CHECK (amount >= 0),
+    payment_method TEXT NOT NULL CHECK (payment_method IN ('card', 'paypal', 'bank_transfer', 'crypto')),
+    payment_status TEXT NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
+    transaction_id TEXT UNIQUE,
+    paid_at TIMESTAMPTZ
+);
+
+-- таблица изображений объявлений
+CREATE TABLE IF NOT EXISTS images (
+    image_id SERIAL PRIMARY KEY,
+    listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    is_primary BOOLEAN DEFAULT FALSE,
+    order_index INTEGER DEFAULT 0,
+    uploaded_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+    id SERIAL PRIMARY KEY,
+    table_name VARCHAR(100) NOT NULL,
+    record_id BIGINT NOT NULL,
+    action VARCHAR(10) NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    old_data JSONB,
+    new_data JSONB
+);

@@ -38,4 +38,31 @@ type Handler interface {
 	GetReviewByID(c echo.Context) error
 	UpdateReview(c echo.Context) error
 	DeleteReview(c echo.Context) error
+
+	CreateAmenity(c echo.Context) error
+	GetAmenityByID(c echo.Context) error
+	GetAllAmenities(c echo.Context) error
+	UpdateAmenity(c echo.Context) error
+	DeleteAmenity(c echo.Context) error
+	AddAmenityToListing(c echo.Context) error
+	RemoveAmenityFromListing(c echo.Context) error
+	GetAmenitiesByListingID(c echo.Context) error
+
+	CreateFavorite(c echo.Context) error
+	GetFavoriteByID(c echo.Context) error
+	GetFavoritesByUserID(c echo.Context) error
+	DeleteFavorite(c echo.Context) error
+	DeleteFavoriteByUserAndListing(c echo.Context) error
+
+	CreatePayment(c echo.Context) error
+	GetPaymentByID(c echo.Context) error
+	GetPaymentsByBookingID(c echo.Context) error
+	UpdatePayment(c echo.Context) error
+	DeletePayment(c echo.Context) error
+
+	CreateImage(c echo.Context) error
+	GetImageByID(c echo.Context) error
+	GetImagesByListingID(c echo.Context) error
+	UpdateImage(c echo.Context) error
+	DeleteImage(c echo.Context) error
 }

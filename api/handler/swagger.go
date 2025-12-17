@@ -77,3 +77,40 @@ type ReviewUpdate struct {
 	Text  string `json:"text" db:"text"`
 	Score int    `json:"score" db:"score"`
 }
+
+type AmenityCreate struct {
+	Name string `json:"name" db:"name"`
+}
+
+type AmenityUpdate struct {
+	Name string `json:"name" db:"name"`
+}
+
+type FavoriteCreate struct {
+	UserID    int `json:"user_id" db:"user_id"`
+	ListingID int `json:"listing_id" db:"listing_id"`
+}
+
+type PaymentCreate struct {
+	BookingID     int    `json:"booking_id" db:"booking_id"`
+	PaymentMethod string `json:"payment_method" db:"payment_method" example:"card"`
+	PaymentStatus string `json:"payment_status" db:"payment_status" example:"completed"`
+}
+
+type PaymentUpdate struct {
+	PaymentMethod string `json:"payment_method" db:"payment_method"`
+	PaymentStatus string `json:"payment_status" db:"payment_status"`
+}
+
+type ImageCreate struct {
+	ListingID  int    `json:"listing_id" db:"listing_id"`
+	ImageURL   string `json:"image_url" db:"image_url"`
+	IsPrimary  bool   `json:"is_primary" db:"is_primary"`
+	OrderIndex int    `json:"order_index" db:"order_index"`
+}
+
+type ImageUpdate struct {
+	ImageURL   string `json:"image_url" db:"image_url"`
+	IsPrimary  bool   `json:"is_primary" db:"is_primary"`
+	OrderIndex int    `json:"order_index" db:"order_index"`
+}

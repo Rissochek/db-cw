@@ -2,6 +2,7 @@ package faking
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"strings"
 	"sync"
@@ -254,4 +255,298 @@ func checkTimeIntervals(booking model.Booking, bookingsMap map[int][]model.Booki
 	}
 
 	return nil
+}
+
+func (faker *GoFakeIt) GenerateFakeAmenities() (amenities []model.Amenity) {
+	amenityNames := []string{
+		"WiFi",
+		"Кухня",
+		"Парковка",
+		"Кондиционер",
+		"Отопление",
+		"Стиральная машина",
+		"Фен",
+		"Телевизор",
+		"Микроволновка",
+		"Холодильник",
+		"Посудомоечная машина",
+		"Балкон/Терраса",
+		"Бассейн",
+		"Джакузи",
+		"Камин",
+	}
+
+	amenities = make([]model.Amenity, len(amenityNames))
+	for i := range amenityNames {
+		amenities[i].ID = i + 1
+		amenities[i].Name = amenityNames[i]
+	}
+
+	zap.S().Infof("generated %v amenities", len(amenities))
+	return amenities
+}
+
+func (faker *GoFakeIt) GenerateFakeListingAmenities(listings []model.Listing, amenities []model.Amenity) (listingAmenities []model.ListingAmenity) {
+	zap.S().Infof("start generating listing amenities for %v listings", len(listings))
+
+	var wg sync.WaitGroup
+	workers := 10
+	chunkSize := (len(listings) + workers - 1) / workers
+	mu := sync.Mutex{}
+	result := make([]model.ListingAmenity, 0)
+
+	for worker := 0; worker < workers; worker++ {
+		wg.Add(1)
+		go func(startIdx int) {
+			defer wg.Done()
+			endIdx := min(startIdx+chunkSize, len(listings))
+			localResult := make([]model.ListingAmenity, 0)
+
+			for i := startIdx; i < endIdx; i++ {
+				listingID := listings[i].ID
+
+				numAmenities := faker.faker.IntRange(1, 5)
+				usedAmenityIDs := make(map[int]bool)
+
+				for j := 0; j < numAmenities; j++ {
+					maxAttempts := 20
+					var amenityID int
+					found := false
+
+					for attempt := 0; attempt < maxAttempts; attempt++ {
+						amenityIndex := faker.faker.IntRange(0, len(amenities)-1)
+						amenityID = amenities[amenityIndex].ID
+
+						if !usedAmenityIDs[amenityID] {
+							usedAmenityIDs[amenityID] = true
+							found = true
+							break
+						}
+					}
+
+					if found {
+						localResult = append(localResult, model.ListingAmenity{
+							ListingID: listingID,
+							AmenityID: amenityID,
+						})
+					}
+				}
+			}
+
+			mu.Lock()
+			result = append(result, localResult...)
+			mu.Unlock()
+		}(worker * chunkSize)
+	}
+
+	wg.Wait()
+
+	zap.S().Infof("generated %v listing amenities", len(result))
+	return result
+}
+
+func (faker *GoFakeIt) GenerateFakeFavorites(toGen int, users []model.User, listings []model.Listing) (favorites []model.Favorite) {
+	favorites = make([]model.Favorite, 0, toGen)
+
+	zap.S().Infof("start generating %v favorites", toGen)
+
+	var wg sync.WaitGroup
+	workers := 10
+	chunkSize := (toGen + workers - 1) / workers
+	mu := sync.Mutex{}
+	usedPairs := make(map[string]bool)
+
+	for worker := 0; worker < workers; worker++ {
+		wg.Add(1)
+		go func(startIdx int) {
+			defer wg.Done()
+			endIdx := min(startIdx+chunkSize, toGen)
+			localFavorites := make([]model.Favorite, 0)
+
+			for i := startIdx; i < endIdx; i++ {
+				maxAttempts := 50
+				found := false
+
+				for attempt := 0; attempt < maxAttempts; attempt++ {
+					userIndex := faker.faker.IntRange(0, len(users)-1)
+					listingIndex := faker.faker.IntRange(0, len(listings)-1)
+
+					userID := users[userIndex].ID
+					listingID := listings[listingIndex].ID
+
+					pairKey := fmt.Sprintf("%d-%d", userID, listingID)
+
+					mu.Lock()
+					if !usedPairs[pairKey] {
+						usedPairs[pairKey] = true
+						found = true
+						mu.Unlock()
+
+						localFavorites = append(localFavorites, model.Favorite{
+							UserID:    userID,
+							ListingID: listingID,
+						})
+						break
+					}
+					mu.Unlock()
+				}
+
+				if !found {
+					zap.S().Warnf("failed to generate unique favorite pair after %d attempts", maxAttempts)
+				}
+			}
+
+			mu.Lock()
+			favorites = append(favorites, localFavorites...)
+			mu.Unlock()
+		}(worker * chunkSize)
+	}
+
+	wg.Wait()
+
+	for i := range favorites {
+		favorites[i].ID = i + 1
+	}
+
+	zap.S().Infof("generated %v favorites", len(favorites))
+	return favorites
+}
+
+func (faker *GoFakeIt) GenerateFakePayments(bookings []model.Booking) (payments []model.Payment) {
+	paymentMethods := []string{"card", "paypal", "bank_transfer", "crypto"}
+
+	zap.S().Infof("start generating payments for %v bookings", len(bookings))
+
+	var wg sync.WaitGroup
+	workers := 10
+	chunkSize := (len(bookings) + workers - 1) / workers
+	mu := sync.Mutex{}
+	result := make([]model.Payment, 0)
+
+	for worker := 0; worker < workers; worker++ {
+		wg.Add(1)
+		go func(startIdx int) {
+			defer wg.Done()
+			endIdx := min(startIdx+chunkSize, len(bookings))
+			localPayments := make([]model.Payment, 0)
+
+			for i := startIdx; i < endIdx; i++ {
+				booking := bookings[i]
+
+				paymentMethod := paymentMethods[faker.faker.IntRange(0, len(paymentMethods)-1)]
+				var paymentStatus string
+				var amount float64
+				var paidAt *time.Time
+				var transactionID *string
+
+				if booking.IsPaid {
+					paymentStatus = "completed"
+					amount = booking.TotalPrice
+					paidTime := time.Now().UTC().Add(-time.Duration(faker.faker.IntRange(1, 365)) * 24 * time.Hour)
+					paidAt = &paidTime
+					txnID := GenerateTransactionID(booking.BookingID)
+					transactionID = &txnID
+				} else {
+					if faker.faker.Bool() {
+						paymentStatus = "completed"
+						amount = booking.TotalPrice
+						paidTime := time.Now().UTC().Add(-time.Duration(faker.faker.IntRange(1, 365)) * 24 * time.Hour)
+						paidAt = &paidTime
+						txnID := fmt.Sprintf("TXN-%d-%d-%d", booking.BookingID, i, faker.faker.IntRange(1000, 9999))
+						transactionID = &txnID
+					} else {
+						paymentStatus = "failed"
+						amount = 0
+						paidAt = nil
+						transactionID = nil
+					}
+				}
+
+				localPayments = append(localPayments, model.Payment{
+					BookingID:     booking.BookingID,
+					Amount:        amount,
+					PaymentMethod: paymentMethod,
+					PaymentStatus: paymentStatus,
+					TransactionID: transactionID,
+					PaidAt:        paidAt,
+				})
+			}
+
+			mu.Lock()
+			result = append(result, localPayments...)
+			mu.Unlock()
+		}(worker * chunkSize)
+	}
+
+	wg.Wait()
+
+	for i := range result {
+		result[i].PaymentID = i + 1
+	}
+
+	zap.S().Infof("generated %v payments", len(result))
+	return result
+}
+
+func GenerateTransactionID(bookingID int) string {
+	return fmt.Sprintf("TXN-%d-%d", bookingID, time.Now().Unix())
+}
+
+func (faker *GoFakeIt) GenerateFakeImages(listings []model.Listing) (images []model.Image) {
+	zap.S().Infof("start generating images for %v listings", len(listings))
+
+	var wg sync.WaitGroup
+	workers := 10
+	chunkSize := (len(listings) + workers - 1) / workers
+	mu := sync.Mutex{}
+	result := make([]model.Image, 0)
+
+	for worker := 0; worker < workers; worker++ {
+		wg.Add(1)
+		go func(startIdx int) {
+			defer wg.Done()
+			endIdx := min(startIdx+chunkSize, len(listings))
+			localImages := make([]model.Image, 0)
+
+			for i := startIdx; i < endIdx; i++ {
+				listing := listings[i]
+
+				numImages := faker.faker.IntRange(1, 5)
+				hasPrimary := false
+
+				for j := 0; j < numImages; j++ {
+					imageURL := faker.faker.URL()
+
+					isPrimary := false
+					if !hasPrimary && (j == 0 || faker.faker.Bool()) {
+						isPrimary = true
+						hasPrimary = true
+					}
+
+					uploadedTime := time.Now().UTC().Add(-time.Duration(faker.faker.IntRange(1, 180)) * 24 * time.Hour)
+
+					localImages = append(localImages, model.Image{
+						ListingID:  listing.ID,
+						ImageURL:   imageURL,
+						IsPrimary:  isPrimary,
+						OrderIndex: j,
+						UploadedAt: uploadedTime,
+					})
+				}
+			}
+
+			mu.Lock()
+			result = append(result, localImages...)
+			mu.Unlock()
+		}(worker * chunkSize)
+	}
+
+	wg.Wait()
+
+	for i := range result {
+		result[i].ImageID = i + 1
+	}
+
+	zap.S().Infof("generated %v images", len(result))
+	return result
 }

@@ -16,7 +16,8 @@ import (
 )
 
 var (
-	seed = int64(42)
+	seed  = int64(42)
+	isGen = true
 )
 
 func InitApp() *App {
@@ -32,7 +33,10 @@ func InitApp() *App {
 	repo := postgres.NewPostgres(conn)
 
 	service := service.NewService(faker, repo)
-	service.FillDatabase(ctx, seed)
+
+	if isGen {
+		service.FillDatabase(ctx, seed)
+	}
 
 	handler := handler.NewHandler(service)
 
@@ -73,6 +77,33 @@ func (app *App) SetupRoutes() *echo.Echo {
 	api.GET("/reviews/:id", app.handler.GetReviewByID)
 	api.PUT("/reviews/:id", app.handler.UpdateReview)
 	api.DELETE("/reviews/:id", app.handler.DeleteReview)
+
+	api.POST("/amenities", app.handler.CreateAmenity)
+	api.GET("/amenities", app.handler.GetAllAmenities)
+	api.GET("/amenities/:id", app.handler.GetAmenityByID)
+	api.PUT("/amenities/:id", app.handler.UpdateAmenity)
+	api.DELETE("/amenities/:id", app.handler.DeleteAmenity)
+	api.POST("/listings/:listing_id/amenities/:amenity_id", app.handler.AddAmenityToListing)
+	api.DELETE("/listings/:listing_id/amenities/:amenity_id", app.handler.RemoveAmenityFromListing)
+	api.GET("/listings/:listing_id/amenities", app.handler.GetAmenitiesByListingID)
+
+	api.POST("/favorites", app.handler.CreateFavorite)
+	api.GET("/favorites/:id", app.handler.GetFavoriteByID)
+	api.GET("/users/:user_id/favorites", app.handler.GetFavoritesByUserID)
+	api.DELETE("/favorites/:id", app.handler.DeleteFavorite)
+	api.DELETE("/users/:user_id/favorites/:listing_id", app.handler.DeleteFavoriteByUserAndListing)
+
+	api.POST("/payments", app.handler.CreatePayment)
+	api.GET("/payments/:id", app.handler.GetPaymentByID)
+	api.GET("/bookings/:booking_id/payments", app.handler.GetPaymentsByBookingID)
+	api.PUT("/payments/:id", app.handler.UpdatePayment)
+	api.DELETE("/payments/:id", app.handler.DeletePayment)
+
+	api.POST("/images", app.handler.CreateImage)
+	api.GET("/images/:id", app.handler.GetImageByID)
+	api.GET("/listings/:listing_id/images", app.handler.GetImagesByListingID)
+	api.PUT("/images/:id", app.handler.UpdateImage)
+	api.DELETE("/images/:id", app.handler.DeleteImage)
 
 	return e
 }

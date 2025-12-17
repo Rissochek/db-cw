@@ -1,4 +1,14 @@
 definitions:
+  handler.AmenityCreate:
+    properties:
+      name:
+        type: string
+    type: object
+  handler.AmenityUpdate:
+    properties:
+      name:
+        type: string
+    type: object
   handler.BookingCreate:
     properties:
       guest_id:
@@ -41,6 +51,33 @@ definitions:
         example: not found
         type: string
     type: object
+  handler.FavoriteCreate:
+    properties:
+      listing_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  handler.ImageCreate:
+    properties:
+      image_url:
+        type: string
+      is_primary:
+        type: boolean
+      listing_id:
+        type: integer
+      order_index:
+        type: integer
+    type: object
+  handler.ImageUpdate:
+    properties:
+      image_url:
+        type: string
+      is_primary:
+        type: boolean
+      order_index:
+        type: integer
+    type: object
   handler.ListingCreate:
     properties:
       address:
@@ -64,6 +101,24 @@ definitions:
         type: number
       rooms_number:
         type: integer
+    type: object
+  handler.PaymentCreate:
+    properties:
+      booking_id:
+        type: integer
+      payment_method:
+        example: card
+        type: string
+      payment_status:
+        example: completed
+        type: string
+    type: object
+  handler.PaymentUpdate:
+    properties:
+      payment_method:
+        type: string
+      payment_status:
+        type: string
     type: object
   handler.ReviewCreate:
     properties:
@@ -120,6 +175,13 @@ definitions:
       second_name:
         type: string
     type: object
+  model.Amenity:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   model.Booking:
     properties:
       guest_id:
@@ -139,6 +201,30 @@ definitions:
       total_price:
         type: number
     type: object
+  model.Favorite:
+    properties:
+      id:
+        type: integer
+      listing_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  model.Image:
+    properties:
+      image_id:
+        type: integer
+      image_url:
+        type: string
+      is_primary:
+        type: boolean
+      listing_id:
+        type: integer
+      order_index:
+        type: integer
+      uploaded_at:
+        type: string
+    type: object
   model.Listing:
     properties:
       address:
@@ -155,6 +241,30 @@ definitions:
         type: number
       rooms_number:
         type: integer
+    type: object
+  model.ListingAmenity:
+    properties:
+      amenity_id:
+        type: integer
+      listing_id:
+        type: integer
+    type: object
+  model.Payment:
+    properties:
+      amount:
+        type: number
+      booking_id:
+        type: integer
+      paid_at:
+        type: string
+      payment_id:
+        type: integer
+      payment_method:
+        type: string
+      payment_status:
+        type: string
+      transaction_id:
+        type: string
     type: object
   model.Review:
     properties:
@@ -175,6 +285,148 @@ info:
   title: DB CW
   version: "1.0"
 paths:
+  /api/amenities:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Amenity'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить все удобства
+      tags:
+      - amenities
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные удобства
+        in: body
+        name: amenity
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AmenityCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Amenity'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Создать удобство
+      tags:
+      - amenities
+  /api/amenities/{id}:
+    delete:
+      parameters:
+      - description: Amenity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить удобство
+      tags:
+      - amenities
+    get:
+      parameters:
+      - description: Amenity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Amenity'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить удобство по ID
+      tags:
+      - amenities
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Amenity ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные удобства
+        in: body
+        name: amenity
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AmenityUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Amenity'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Обновить удобство
+      tags:
+      - amenities
   /api/bookings:
     post:
       consumes:
@@ -204,6 +456,34 @@ paths:
       summary: Создать бронирование
       tags:
       - bookings
+  /api/bookings/{booking_id}/payments:
+    get:
+      parameters:
+      - description: Booking ID
+        in: path
+        name: booking_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Payment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить платежи по booking ID
+      tags:
+      - payments
   /api/bookings/{id}:
     delete:
       parameters:
@@ -333,6 +613,219 @@ paths:
       summary: Batch импорт бронирований
       tags:
       - bookings
+  /api/favorites:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные избранного
+        in: body
+        name: favorite
+        required: true
+        schema:
+          $ref: '#/definitions/handler.FavoriteCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Favorite'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Добавить объявление в избранное
+      tags:
+      - favorites
+  /api/favorites/{id}:
+    delete:
+      parameters:
+      - description: Favorite ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить избранное по ID
+      tags:
+      - favorites
+    get:
+      parameters:
+      - description: Favorite ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Favorite'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить избранное по ID
+      tags:
+      - favorites
+  /api/images:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные изображения
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ImageCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Image'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Создать изображение
+      tags:
+      - images
+  /api/images/{id}:
+    delete:
+      parameters:
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить изображение
+      tags:
+      - images
+    get:
+      parameters:
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Image'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить изображение по ID
+      tags:
+      - images
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные изображения
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ImageUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Image'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Обновить изображение
+      tags:
+      - images
   /api/listings:
     post:
       consumes:
@@ -458,6 +951,133 @@ paths:
       summary: Обновить объявление
       tags:
       - listings
+  /api/listings/{listing_id}/amenities:
+    get:
+      parameters:
+      - description: Listing ID
+        in: path
+        name: listing_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Amenity'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить удобства объявления
+      tags:
+      - amenities
+  /api/listings/{listing_id}/amenities/{amenity_id}:
+    delete:
+      parameters:
+      - description: Listing ID
+        in: path
+        name: listing_id
+        required: true
+        type: integer
+      - description: Amenity ID
+        in: path
+        name: amenity_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить удобство из объявления
+      tags:
+      - amenities
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Listing ID
+        in: path
+        name: listing_id
+        required: true
+        type: integer
+      - description: Amenity ID
+        in: path
+        name: amenity_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.ListingAmenity'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Добавить удобство к объявлению
+      tags:
+      - amenities
+  /api/listings/{listing_id}/images:
+    get:
+      parameters:
+      - description: Listing ID
+        in: path
+        name: listing_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Image'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить изображения по listing ID
+      tags:
+      - images
   /api/listings/batch:
     post:
       consumes:
@@ -491,6 +1111,131 @@ paths:
       summary: Batch импорт объявлений
       tags:
       - listings
+  /api/payments:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные платежа
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/handler.PaymentCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Payment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Создать платеж
+      tags:
+      - payments
+  /api/payments/{id}:
+    delete:
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить платеж
+      tags:
+      - payments
+    get:
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Payment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить платеж по ID
+      tags:
+      - payments
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные платежа
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/handler.PaymentUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Payment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Обновить платеж
+      tags:
+      - payments
   /api/reviews:
     post:
       consumes:
@@ -774,6 +1519,69 @@ paths:
       summary: Обновить пользователя
       tags:
       - users
+  /api/users/{user_id}/favorites:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Favorite'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить избранное пользователя
+      tags:
+      - favorites
+  /api/users/{user_id}/favorites/{listing_id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Listing ID
+        in: path
+        name: listing_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Удалить избранное по user_id и listing_id
+      tags:
+      - favorites
   /api/users/batch:
     post:
       consumes:

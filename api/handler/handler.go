@@ -40,4 +40,31 @@ type Service interface {
 	UpdateReview(ctx context.Context, review *model.Review) error
 	DeleteReview(ctx context.Context, id int) error
 	CreateReviews(ctx context.Context, reviews []model.Review) error
+
+	CreateAmenity(ctx context.Context, amenity *model.Amenity) error
+	GetAmenityByID(ctx context.Context, id int) (*model.Amenity, error)
+	GetAllAmenities(ctx context.Context) ([]model.Amenity, error)
+	UpdateAmenity(ctx context.Context, amenity *model.Amenity) error
+	DeleteAmenity(ctx context.Context, id int) error
+	AddAmenityToListing(ctx context.Context, listingID int, amenityID int) error
+	RemoveAmenityFromListing(ctx context.Context, listingID int, amenityID int) error
+	GetAmenitiesByListingID(ctx context.Context, listingID int) ([]model.Amenity, error)
+
+	CreateFavorite(ctx context.Context, favorite *model.Favorite) error
+	GetFavoriteByID(ctx context.Context, id int) (*model.Favorite, error)
+	GetFavoritesByUserID(ctx context.Context, userID int) ([]model.Favorite, error)
+	DeleteFavorite(ctx context.Context, id int) error
+	DeleteFavoriteByUserAndListing(ctx context.Context, userID int, listingID int) error
+
+	CreatePayment(ctx context.Context, payment *model.Payment) error
+	GetPaymentByID(ctx context.Context, paymentID int) (*model.Payment, error)
+	GetPaymentsByBookingID(ctx context.Context, bookingID int) ([]model.Payment, error)
+	UpdatePayment(ctx context.Context, payment *model.Payment) error
+	DeletePayment(ctx context.Context, paymentID int) error
+
+	CreateImage(ctx context.Context, image *model.Image) error
+	GetImageByID(ctx context.Context, imageID int) (*model.Image, error)
+	GetImagesByListingID(ctx context.Context, listingID int) ([]model.Image, error)
+	UpdateImage(ctx context.Context, image *model.Image) error
+	DeleteImage(ctx context.Context, imageID int) error
 }

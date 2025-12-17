@@ -133,6 +133,29 @@ func (pg *Postgres) UpdateBooking(ctx context.Context, booking *model.Booking) e
 	return nil
 }
 
+func (pg *Postgres) UpdateBookingIsPaid(ctx context.Context, bookingID int, isPaid bool) error {
+	query := `UPDATE bookings SET is_paid = $1 WHERE booking_id = $2`
+
+	result, err := pg.conn.ExecContext(ctx, query, isPaid, bookingID)
+	if err != nil {
+		zap.S().Errorf("failed to update booking is_paid: %v", err)
+		return fmt.Errorf("failed to update booking is_paid")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		zap.S().Errorf("failed to get rows affected: %v", err)
+		return fmt.Errorf("failed to update booking is_paid")
+	}
+
+	if rowsAffected == 0 {
+		zap.S().Errorf("booking with id %d not found", bookingID)
+		return fmt.Errorf("booking not found")
+	}
+
+	return nil
+}
+
 func (pg *Postgres) UpdateBookings(ctx context.Context, bookings []model.Booking) error {
 	query := `UPDATE bookings SET listing_id = $1, host_id = $2, guest_id = $3, in_date = $4, out_date = $5, total_price = $6, is_paid = $7 WHERE booking_id = $8`
 
