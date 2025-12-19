@@ -652,6 +652,181 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/functions/guests/{guest_id}/total-spent": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "functions"
+                ],
+                "summary": "Получить общую сумму потраченную гостем",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Guest ID",
+                        "name": "guest_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number",
+                                "format": "float64"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/functions/hosts/{host_id}/average-rating": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "functions"
+                ],
+                "summary": "Получить средний рейтинг хоста",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Host ID",
+                        "name": "host_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number",
+                                "format": "float64"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/functions/hosts/{host_id}/revenue": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "functions"
+                ],
+                "summary": "Получить общую выручку хоста",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Host ID",
+                        "name": "host_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number",
+                                "format": "float64"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/functions/listings/{listing_id}/active-bookings": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "functions"
+                ],
+                "summary": "Получить количество активных бронирований объявления",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Listing ID",
+                        "name": "listing_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
         "/api/images": {
             "post": {
                 "consumes": [
@@ -1469,6 +1644,315 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/procedures/bookings/{id}/cancel-with-refund": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "procedures"
+                ],
+                "summary": "Отменить бронирование с возвратом через процедуру",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Booking ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.StatusOK"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/procedures/create-booking-with-payment": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "procedures"
+                ],
+                "summary": "Создать бронирование с платежом через процедуру",
+                "parameters": [
+                    {
+                        "description": "Данные бронирования",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.BookingWithPaymentCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateBookingWithPaymentResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/procedures/payments/{id}/confirm": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "procedures"
+                ],
+                "summary": "Подтвердить платеж через процедуру",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Payment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные подтверждения",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.PaymentConfirmRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.StatusOK"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorNotFound"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reports/bookings": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "functions"
+                ],
+                "summary": "Получить отчет по бронированиям",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-01T00:00:00Z",
+                        "description": "Start Date",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-31T23:59:59Z",
+                        "description": "End Date",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.BookingReport"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reports/hosts-performance": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "functions"
+                ],
+                "summary": "Получить отчет о производительности хостов",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.HostPerformanceReport"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reports/listings-statistics": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "functions"
+                ],
+                "summary": "Получить статистический отчет по объявлениям",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ListingStatisticsReport"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reports/payments-summary": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "functions"
+                ],
+                "summary": "Получить сводный отчет по платежам",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-01-01T00:00:00Z",
+                        "description": "Start Date",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-12-31T23:59:59Z",
+                        "description": "End Date",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.PaymentSummaryReport"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorBadRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorInternal"
+                        }
+                    }
+                }
+            }
+        },
         "/api/reviews": {
             "post": {
                 "consumes": [
@@ -2102,6 +2586,29 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.BookingWithPaymentCreate": {
+            "type": "object",
+            "properties": {
+                "guest_id": {
+                    "type": "integer"
+                },
+                "in_date": {
+                    "type": "string",
+                    "example": "2025-12-12T14:00:00+03:00"
+                },
+                "listing_id": {
+                    "type": "integer"
+                },
+                "out_date": {
+                    "type": "string",
+                    "example": "2025-12-15T14:00:00+03:00"
+                },
+                "payment_method": {
+                    "type": "string",
+                    "example": "card"
+                }
+            }
+        },
         "handler.ErrorBadRequest": {
             "type": "object",
             "properties": {
@@ -2205,6 +2712,14 @@ const docTemplate = `{
                 },
                 "rooms_number": {
                     "type": "integer"
+                }
+            }
+        },
+        "handler.PaymentConfirmRequest": {
+            "type": "object",
+            "properties": {
+                "transaction_id": {
+                    "type": "string"
                 }
             }
         },
@@ -2360,6 +2875,69 @@ const docTemplate = `{
                 }
             }
         },
+        "model.BookingReport": {
+            "type": "object",
+            "properties": {
+                "booking_id": {
+                    "type": "integer"
+                },
+                "duration_days": {
+                    "type": "integer"
+                },
+                "guest_id": {
+                    "type": "integer"
+                },
+                "guest_name": {
+                    "type": "string"
+                },
+                "host_id": {
+                    "type": "integer"
+                },
+                "host_name": {
+                    "type": "string"
+                },
+                "in_date": {
+                    "type": "string",
+                    "example": "2025-12-12T14:00:00+03:00"
+                },
+                "is_paid": {
+                    "type": "boolean"
+                },
+                "listing_address": {
+                    "type": "string"
+                },
+                "listing_id": {
+                    "type": "integer"
+                },
+                "out_date": {
+                    "type": "string",
+                    "example": "2025-12-15T14:00:00+03:00"
+                },
+                "payment_amount": {
+                    "type": "number"
+                },
+                "payment_status": {
+                    "type": "string"
+                },
+                "review_score": {
+                    "type": "integer"
+                },
+                "total_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.CreateBookingWithPaymentResult": {
+            "type": "object",
+            "properties": {
+                "booking_id": {
+                    "type": "integer"
+                },
+                "payment_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.Favorite": {
             "type": "object",
             "properties": {
@@ -2371,6 +2949,35 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.HostPerformanceReport": {
+            "type": "object",
+            "properties": {
+                "average_rating": {
+                    "type": "number"
+                },
+                "completed_payments_count": {
+                    "type": "integer"
+                },
+                "host_email": {
+                    "type": "string"
+                },
+                "host_id": {
+                    "type": "integer"
+                },
+                "host_name": {
+                    "type": "string"
+                },
+                "listings_count": {
+                    "type": "integer"
+                },
+                "total_bookings": {
+                    "type": "integer"
+                },
+                "total_revenue": {
+                    "type": "number"
                 }
             }
         },
@@ -2434,6 +3041,41 @@ const docTemplate = `{
                 }
             }
         },
+        "model.ListingStatisticsReport": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "average_rating": {
+                    "type": "number"
+                },
+                "bookings_count": {
+                    "type": "integer"
+                },
+                "host_id": {
+                    "type": "integer"
+                },
+                "host_name": {
+                    "type": "string"
+                },
+                "is_available": {
+                    "type": "boolean"
+                },
+                "listing_id": {
+                    "type": "integer"
+                },
+                "price_per_night": {
+                    "type": "number"
+                },
+                "reviews_count": {
+                    "type": "integer"
+                },
+                "total_revenue": {
+                    "type": "number"
+                }
+            }
+        },
         "model.Payment": {
             "type": "object",
             "properties": {
@@ -2457,6 +3099,32 @@ const docTemplate = `{
                 },
                 "transaction_id": {
                     "type": "string"
+                }
+            }
+        },
+        "model.PaymentSummaryReport": {
+            "type": "object",
+            "properties": {
+                "average_amount": {
+                    "type": "number"
+                },
+                "max_amount": {
+                    "type": "number"
+                },
+                "min_amount": {
+                    "type": "number"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "payment_status": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "transactions_count": {
+                    "type": "integer"
                 }
             }
         },

@@ -1,8 +1,3 @@
-ALTER TABLE listings 
-ADD COLUMN IF NOT EXISTS average_rating DECIMAL(3,2) DEFAULT 0.00 CHECK (average_rating >= 0 AND average_rating <= 5),
-ADD COLUMN IF NOT EXISTS reviews_count INTEGER DEFAULT 0 CHECK (reviews_count >= 0),
-ADD COLUMN IF NOT EXISTS bookings_count INTEGER DEFAULT 0 CHECK (bookings_count >= 0);
-
 CREATE OR REPLACE FUNCTION update_listing_reviews_stats()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -158,56 +153,67 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS users_audit_trigger ON users;
 CREATE TRIGGER users_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON users
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS listings_audit_trigger ON listings;
 CREATE TRIGGER listings_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON listings
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS bookings_audit_trigger ON bookings;
 CREATE TRIGGER bookings_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON bookings
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS reviews_audit_trigger ON reviews;
 CREATE TRIGGER reviews_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON reviews
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS amenities_audit_trigger ON amenities;
 CREATE TRIGGER amenities_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON amenities
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS listing_amenities_audit_trigger ON listing_amenities;
 CREATE TRIGGER listing_amenities_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON listing_amenities
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS favorites_audit_trigger ON favorites;
 CREATE TRIGGER favorites_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON favorites
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS payments_audit_trigger ON payments;
 CREATE TRIGGER payments_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON payments
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS images_audit_trigger ON images;
 CREATE TRIGGER images_audit_trigger
     AFTER INSERT OR UPDATE OR DELETE ON images
     FOR EACH ROW
     EXECUTE FUNCTION audit_trigger_function();
 
+DROP TRIGGER IF EXISTS reviews_update_listing_stats_trigger ON reviews;
 CREATE TRIGGER reviews_update_listing_stats_trigger
     AFTER INSERT OR UPDATE OR DELETE ON reviews
     FOR EACH ROW
     EXECUTE FUNCTION update_listing_reviews_stats();
 
+DROP TRIGGER IF EXISTS bookings_update_listing_count_trigger ON bookings;
 CREATE TRIGGER bookings_update_listing_count_trigger
     AFTER INSERT OR UPDATE OR DELETE ON bookings
     FOR EACH ROW

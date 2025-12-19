@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"time"
 
 	"github.com/Rissochek/db-cw/internal/model"
 )
@@ -67,4 +68,18 @@ type Service interface {
 	GetImagesByListingID(ctx context.Context, listingID int) ([]model.Image, error)
 	UpdateImage(ctx context.Context, image *model.Image) error
 	DeleteImage(ctx context.Context, imageID int) error
+
+	GetHostTotalRevenue(ctx context.Context, hostID int) (float64, error)
+	GetGuestTotalSpent(ctx context.Context, guestID int) (float64, error)
+	GetHostAverageRating(ctx context.Context, hostID int) (float64, error)
+	GetListingActiveBookingsCount(ctx context.Context, listingID int) (int, error)
+
+	GetListingsStatisticsReport(ctx context.Context) ([]model.ListingStatisticsReport, error)
+	GetHostsPerformanceReport(ctx context.Context) ([]model.HostPerformanceReport, error)
+	GetBookingsReport(ctx context.Context, startDate, endDate *time.Time) ([]model.BookingReport, error)
+	GetPaymentsSummaryReport(ctx context.Context, startDate, endDate *time.Time) ([]model.PaymentSummaryReport, error)
+
+	CreateBookingWithPayment(ctx context.Context, listingID, guestID int, inDate, outDate time.Time, paymentMethod string) (*model.CreateBookingWithPaymentResult, error)
+	ConfirmPayment(ctx context.Context, paymentID int, transactionID *string) error
+	CancelBookingWithRefund(ctx context.Context, bookingID int) error
 }

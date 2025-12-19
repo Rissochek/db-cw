@@ -65,4 +65,18 @@ type Handler interface {
 	GetImagesByListingID(c echo.Context) error
 	UpdateImage(c echo.Context) error
 	DeleteImage(c echo.Context) error
+
+	GetHostTotalRevenue(c echo.Context) error
+	GetGuestTotalSpent(c echo.Context) error
+	GetHostAverageRating(c echo.Context) error
+	GetListingActiveBookingsCount(c echo.Context) error
+
+	GetListingsStatisticsReport(c echo.Context) error
+	GetHostsPerformanceReport(c echo.Context) error
+	GetBookingsReport(c echo.Context) error
+	GetPaymentsSummaryReport(c echo.Context) error
+
+	CreateBookingWithPayment(c echo.Context) error
+	ConfirmPayment(c echo.Context) error
+	CancelBookingWithRefund(c echo.Context) error
 }

@@ -15,10 +15,10 @@ CREATE TABLE IF NOT EXISTS listings (
     price_per_night DECIMAL(10,2) NOT NULL CHECK (price_per_night > 0),
     is_available BOOLEAN DEFAULT TRUE,
     rooms_number INTEGER NOT NULL CHECK (rooms_number > 0),
-    beds_number INTEGER NOT NULL CHECK (beds_number > 0)
+    beds_number INTEGER NOT NULL CHECK (beds_number > 0),
     average_rating DECIMAL(3,2) DEFAULT 0.00 CHECK (average_rating >= 0 AND average_rating <= 5),
     reviews_count INTEGER DEFAULT 0 CHECK (reviews_count >= 0),
-    bookings_count INTEGER DEFAULT 0 CHECK (bookings_count >= 0);
+    bookings_count INTEGER DEFAULT 0 CHECK (bookings_count >= 0)
 );
 
 -- таблица бронирований

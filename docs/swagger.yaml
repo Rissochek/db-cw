@@ -33,6 +33,22 @@ definitions:
         example: "2025-12-16T14:00:00+03:00"
         type: string
     type: object
+  handler.BookingWithPaymentCreate:
+    properties:
+      guest_id:
+        type: integer
+      in_date:
+        example: "2025-12-12T14:00:00+03:00"
+        type: string
+      listing_id:
+        type: integer
+      out_date:
+        example: "2025-12-15T14:00:00+03:00"
+        type: string
+      payment_method:
+        example: card
+        type: string
+    type: object
   handler.ErrorBadRequest:
     properties:
       error:
@@ -101,6 +117,11 @@ definitions:
         type: number
       rooms_number:
         type: integer
+    type: object
+  handler.PaymentConfirmRequest:
+    properties:
+      transaction_id:
+        type: string
     type: object
   handler.PaymentCreate:
     properties:
@@ -201,6 +222,48 @@ definitions:
       total_price:
         type: number
     type: object
+  model.BookingReport:
+    properties:
+      booking_id:
+        type: integer
+      duration_days:
+        type: integer
+      guest_id:
+        type: integer
+      guest_name:
+        type: string
+      host_id:
+        type: integer
+      host_name:
+        type: string
+      in_date:
+        example: "2025-12-12T14:00:00+03:00"
+        type: string
+      is_paid:
+        type: boolean
+      listing_address:
+        type: string
+      listing_id:
+        type: integer
+      out_date:
+        example: "2025-12-15T14:00:00+03:00"
+        type: string
+      payment_amount:
+        type: number
+      payment_status:
+        type: string
+      review_score:
+        type: integer
+      total_price:
+        type: number
+    type: object
+  model.CreateBookingWithPaymentResult:
+    properties:
+      booking_id:
+        type: integer
+      payment_id:
+        type: integer
+    type: object
   model.Favorite:
     properties:
       id:
@@ -209,6 +272,25 @@ definitions:
         type: integer
       user_id:
         type: integer
+    type: object
+  model.HostPerformanceReport:
+    properties:
+      average_rating:
+        type: number
+      completed_payments_count:
+        type: integer
+      host_email:
+        type: string
+      host_id:
+        type: integer
+      host_name:
+        type: string
+      listings_count:
+        type: integer
+      total_bookings:
+        type: integer
+      total_revenue:
+        type: number
     type: object
   model.Image:
     properties:
@@ -249,6 +331,29 @@ definitions:
       listing_id:
         type: integer
     type: object
+  model.ListingStatisticsReport:
+    properties:
+      address:
+        type: string
+      average_rating:
+        type: number
+      bookings_count:
+        type: integer
+      host_id:
+        type: integer
+      host_name:
+        type: string
+      is_available:
+        type: boolean
+      listing_id:
+        type: integer
+      price_per_night:
+        type: number
+      reviews_count:
+        type: integer
+      total_revenue:
+        type: number
+    type: object
   model.Payment:
     properties:
       amount:
@@ -265,6 +370,23 @@ definitions:
         type: string
       transaction_id:
         type: string
+    type: object
+  model.PaymentSummaryReport:
+    properties:
+      average_amount:
+        type: number
+      max_amount:
+        type: number
+      min_amount:
+        type: number
+      payment_method:
+        type: string
+      payment_status:
+        type: string
+      total_amount:
+        type: number
+      transactions_count:
+        type: integer
     type: object
   model.Review:
     properties:
@@ -701,6 +823,121 @@ paths:
       summary: Получить избранное по ID
       tags:
       - favorites
+  /api/functions/guests/{guest_id}/total-spent:
+    get:
+      parameters:
+      - description: Guest ID
+        in: path
+        name: guest_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              format: float64
+              type: number
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить общую сумму потраченную гостем
+      tags:
+      - functions
+  /api/functions/hosts/{host_id}/average-rating:
+    get:
+      parameters:
+      - description: Host ID
+        in: path
+        name: host_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              format: float64
+              type: number
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить средний рейтинг хоста
+      tags:
+      - functions
+  /api/functions/hosts/{host_id}/revenue:
+    get:
+      parameters:
+      - description: Host ID
+        in: path
+        name: host_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              format: float64
+              type: number
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить общую выручку хоста
+      tags:
+      - functions
+  /api/functions/listings/{listing_id}/active-bookings:
+    get:
+      parameters:
+      - description: Listing ID
+        in: path
+        name: listing_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить количество активных бронирований объявления
+      tags:
+      - functions
   /api/images:
     post:
       consumes:
@@ -1236,6 +1473,209 @@ paths:
       summary: Обновить платеж
       tags:
       - payments
+  /api/procedures/bookings/{id}/cancel-with-refund:
+    post:
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Отменить бронирование с возвратом через процедуру
+      tags:
+      - procedures
+  /api/procedures/create-booking-with-payment:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные бронирования
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.BookingWithPaymentCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.CreateBookingWithPaymentResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Создать бронирование с платежом через процедуру
+      tags:
+      - procedures
+  /api/procedures/payments/{id}/confirm:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные подтверждения
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.PaymentConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.StatusOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorNotFound'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Подтвердить платеж через процедуру
+      tags:
+      - procedures
+  /api/reports/bookings:
+    get:
+      parameters:
+      - description: Start Date
+        example: "2025-01-01T00:00:00Z"
+        format: date-time
+        in: query
+        name: start_date
+        type: string
+      - description: End Date
+        example: "2025-12-31T23:59:59Z"
+        format: date-time
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.BookingReport'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить отчет по бронированиям
+      tags:
+      - functions
+  /api/reports/hosts-performance:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.HostPerformanceReport'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить отчет о производительности хостов
+      tags:
+      - functions
+  /api/reports/listings-statistics:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ListingStatisticsReport'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить статистический отчет по объявлениям
+      tags:
+      - functions
+  /api/reports/payments-summary:
+    get:
+      parameters:
+      - description: Start Date
+        example: "2025-01-01T00:00:00Z"
+        format: date-time
+        in: query
+        name: start_date
+        type: string
+      - description: End Date
+        example: "2025-12-31T23:59:59Z"
+        format: date-time
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.PaymentSummaryReport'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorInternal'
+      summary: Получить сводный отчет по платежам
+      tags:
+      - functions
   /api/reviews:
     post:
       consumes:

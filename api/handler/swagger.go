@@ -114,3 +114,15 @@ type ImageUpdate struct {
 	IsPrimary  bool   `json:"is_primary" db:"is_primary"`
 	OrderIndex int    `json:"order_index" db:"order_index"`
 }
+
+type BookingWithPaymentCreate struct {
+	ListingID     int    `json:"listing_id" db:"listing_id"`
+	GuestID       int    `json:"guest_id" db:"guest_id"`
+	InDate        string `json:"in_date" db:"in_date" example:"2025-12-12T14:00:00+03:00"`
+	OutDate       string `json:"out_date" db:"out_date" example:"2025-12-15T14:00:00+03:00"`
+	PaymentMethod string `json:"payment_method" db:"payment_method" example:"card"`
+}
+
+type PaymentConfirmRequest struct {
+	TransactionID string `json:"transaction_id,omitempty" db:"transaction_id"`
+}

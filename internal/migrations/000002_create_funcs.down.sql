@@ -1,5 +1,4 @@
 DROP FUNCTION IF EXISTS get_host_total_revenue(INTEGER);
-DROP FUNCTION IF EXISTS get_listing_occupancy_rate(INTEGER, TIMESTAMPTZ, TIMESTAMPTZ);
 DROP FUNCTION IF EXISTS get_guest_total_spent(INTEGER);
 DROP FUNCTION IF EXISTS get_host_average_rating(INTEGER);
 DROP FUNCTION IF EXISTS get_listing_active_bookings_count(INTEGER);

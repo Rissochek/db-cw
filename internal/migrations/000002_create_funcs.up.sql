@@ -14,41 +14,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION get_listing_occupancy_rate(
-    listing_id_param INTEGER,
-    start_date TIMESTAMPTZ,
-    end_date TIMESTAMPTZ
-)
-RETURNS DECIMAL(5,2) AS $$
-DECLARE
-    total_days INTEGER;
-    booked_days INTEGER;
-    occupancy_rate DECIMAL(5,2);
-BEGIN
-    total_days := EXTRACT(DAY FROM (end_date - start_date))::INTEGER;
-    
-    IF total_days <= 0 THEN
-        RETURN 0.00;
-    END IF;
-    
-    SELECT COALESCE(SUM( 
-            LEAST(EXTRACT(DAY FROM (b.out_date - start_date))::INTEGER, 
-                  EXTRACT(DAY FROM (end_date - b.in_date))::INTEGER,
-                  EXTRACT(DAY FROM (b.out_date - b.in_date))::INTEGER)
-    ), 0)
-    INTO booked_days
-    FROM bookings b
-    WHERE b.listing_id = listing_id_param
-      AND b.in_date < end_date
-      AND b.out_date > start_date;
-    
-    occupancy_rate := (booked_days::DECIMAL / total_days::DECIMAL) * 100.00;
-    
-    RETURN LEAST(occupancy_rate, 100.00);
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION get_guest_total_spent(guest_id_param INTEGER)
 RETURNS DECIMAL(12,2) AS $$
 DECLARE
@@ -150,17 +115,17 @@ BEGIN
         u.id AS host_id,
         (u.first_name || ' ' || u.second_name) AS host_name,
         u.email AS host_email,
-        COUNT(DISTINCT l.id) AS listings_count,
-        COUNT(DISTINCT b.booking_id) AS total_bookings,
+        COUNT(DISTINCT l.id)::INTEGER AS listings_count,
+        COUNT(DISTINCT b.booking_id)::INTEGER AS total_bookings,
         COALESCE(AVG(r.score), 0.00) AS average_rating,
         COALESCE(SUM(p.amount) FILTER (WHERE p.payment_status = 'completed'), 0.00) AS total_revenue,
-        COUNT(DISTINCT p.payment_id) FILTER (WHERE p.payment_status = 'completed') AS completed_payments_count
+        COUNT(DISTINCT p.payment_id) FILTER (WHERE p.payment_status = 'completed')::INTEGER AS completed_payments_count
     FROM users u
     LEFT JOIN listings l ON u.id = l.host_id
     LEFT JOIN bookings b ON l.id = b.listing_id AND b.host_id = u.id
     LEFT JOIN reviews r ON b.booking_id = r.booking_id
     LEFT JOIN payments p ON b.booking_id = p.booking_id
-    WHERE EXISTS (SELECT 1 FROM listings WHERE host_id = u.id)
+    WHERE EXISTS (SELECT 1 FROM listings lst WHERE lst.host_id = u.id)
     GROUP BY u.id, u.first_name, u.second_name, u.email
     ORDER BY total_revenue DESC, average_rating DESC;
 END;

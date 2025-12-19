@@ -16,8 +16,9 @@ import (
 )
 
 var (
-	seed  = int64(42)
-	isGen = false
+	seed           = int64(42)
+	isGen          = false
+	migrationsPath = "./internal/migrations"
 )
 
 func InitApp() *App {
@@ -31,6 +32,7 @@ func InitApp() *App {
 	dsn := postgres.CreateDsnFromEnv()
 	conn := postgres.CreateConnection(dsn)
 	repo := postgres.NewPostgres(conn)
+	repo.RunMigrations(migrationsPath)
 
 	service := service.NewService(faker, repo)
 
@@ -104,6 +106,20 @@ func (app *App) SetupRoutes() *echo.Echo {
 	api.GET("/listings/:listing_id/images", app.handler.GetImagesByListingID)
 	api.PUT("/images/:id", app.handler.UpdateImage)
 	api.DELETE("/images/:id", app.handler.DeleteImage)
+
+	api.GET("/functions/hosts/:host_id/revenue", app.handler.GetHostTotalRevenue)
+	api.GET("/functions/guests/:guest_id/total-spent", app.handler.GetGuestTotalSpent)
+	api.GET("/functions/hosts/:host_id/average-rating", app.handler.GetHostAverageRating)
+	api.GET("/functions/listings/:listing_id/active-bookings", app.handler.GetListingActiveBookingsCount)
+
+	api.GET("/reports/listings-statistics", app.handler.GetListingsStatisticsReport)
+	api.GET("/reports/hosts-performance", app.handler.GetHostsPerformanceReport)
+	api.GET("/reports/bookings", app.handler.GetBookingsReport)
+	api.GET("/reports/payments-summary", app.handler.GetPaymentsSummaryReport)
+
+	api.POST("/procedures/create-booking-with-payment", app.handler.CreateBookingWithPayment)
+	api.POST("/procedures/payments/:id/confirm", app.handler.ConfirmPayment)
+	api.POST("/procedures/bookings/:id/cancel-with-refund", app.handler.CancelBookingWithRefund)
 
 	return e
 }

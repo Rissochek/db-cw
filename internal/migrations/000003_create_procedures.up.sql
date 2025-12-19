@@ -16,7 +16,7 @@ DECLARE
     v_duration_days INTEGER;
 BEGIN
     IF p_out_date <= p_in_date THEN
-        RAISE EXCEPTION 'Дата выезда должна быть позже даты заезда';
+        RAISE EXCEPTION 'Check-out date must be later than check-in date';
     END IF;
     
     SELECT price_per_night INTO v_price_per_night
@@ -24,7 +24,7 @@ BEGIN
     WHERE id = p_listing_id;
     
     IF v_price_per_night IS NULL THEN
-        RAISE EXCEPTION 'Объявление с ID % не найдено', p_listing_id;
+        RAISE EXCEPTION 'Listing with ID % not found', p_listing_id;
     END IF;
     
     IF EXISTS (
@@ -34,7 +34,7 @@ BEGIN
           AND in_date < p_out_date
           AND out_date > p_in_date
     ) THEN
-        RAISE EXCEPTION 'Выбранные даты пересекаются с существующим бронированием для этого объявления';
+        RAISE EXCEPTION 'Selected dates overlap with an existing booking for this listing';
     END IF;
     
     v_duration_days := EXTRACT(DAY FROM (p_out_date - p_in_date))::INTEGER;
@@ -64,7 +64,7 @@ BEGIN
     WHERE payment_id = p_payment_id;
     
     IF v_booking_id IS NULL THEN
-        RAISE EXCEPTION 'Платеж с ID % не найден', p_payment_id;
+        RAISE EXCEPTION 'Payment with ID % not found', p_payment_id;
     END IF;
     
     UPDATE payments
@@ -89,7 +89,7 @@ DECLARE
     v_payment_status TEXT;
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM bookings WHERE booking_id = p_booking_id) THEN
-        RAISE EXCEPTION 'Бронирование с ID % не найдено', p_booking_id;
+        RAISE EXCEPTION 'Booking with ID % not found', p_booking_id;
     END IF;
     
     SELECT payment_id, payment_status INTO v_payment_id, v_payment_status
@@ -100,7 +100,7 @@ BEGIN
     
     IF v_payment_status = 'completed' THEN
         INSERT INTO payments (booking_id, amount, payment_method, payment_status)
-        SELECT booking_id, -amount, payment_method, 'refunded'
+        SELECT booking_id, amount, payment_method, 'refunded'
         FROM payments
         WHERE payment_id = v_payment_id;
     END IF;
