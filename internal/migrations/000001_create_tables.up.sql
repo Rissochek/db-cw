@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS amenities (
     name TEXT NOT NULL UNIQUE
 );
 
--- таблица связи объявлений и удобств (многие-ко-многим)
+-- таблица связи объявлений и удобств
 CREATE TABLE IF NOT EXISTS listing_amenities (
     listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
     amenity_id INTEGER NOT NULL REFERENCES amenities(id) ON DELETE CASCADE,
@@ -87,9 +87,9 @@ CREATE TABLE IF NOT EXISTS images (
 -- таблица аудита
 CREATE TABLE IF NOT EXISTS audit_log (
     id SERIAL PRIMARY KEY,
-    table_name VARCHAR(100) NOT NULL,
+    table_name TEXT NOT NULL,
     record_id BIGINT NOT NULL,
-    action VARCHAR(10) NOT NULL,
+    action TEXT NOT NULL,
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     old_data JSONB,
     new_data JSONB

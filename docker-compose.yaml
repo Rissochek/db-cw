@@ -14,6 +14,8 @@ services:
   cw:
     image: db-cw:latest
     container_name: db-cw
+    environment:
+      IS_GENERATING: "false"
     ports:
       - "8080:8080"
 

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/Rissochek/db-cw/api/handler"
@@ -13,17 +14,22 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"go.uber.org/zap"
 )
 
 var (
 	seed           = int64(42)
-	isGen          = false
 	migrationsPath = "./internal/migrations"
 )
 
 func InitApp() *App {
 	utils.LoadEnvFile()
-
+	isGenEnv := utils.GetKeyFromEnv("IS_GENERATING")
+	isGenBool, err := strconv.ParseBool(isGenEnv)
+	if err != nil {
+		zap.S().Panicf("Failed to parse IS_GENERATING env key %v", err)
+	}
+	
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
@@ -36,7 +42,7 @@ func InitApp() *App {
 
 	service := service.NewService(faker, repo)
 
-	if isGen {
+	if isGenBool {
 		service.FillDatabase(ctx, seed)
 	}
 
